@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import BackButton from './../components/BackButton';
 import Spinner from "../components/Spinner";
+import { useSnackbar } from "notistack";
 
 const CreateBooks = () => {
-  const [loading, setLoading] = useState(false); // Track loading state
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -16,43 +15,38 @@ const CreateBooks = () => {
   } = useForm();
 
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const onSubmit = async (data) => {
-    setLoading(true); // Start loading state
+    setLoading(true);
     try {
       await axios.post("http://localhost:5005/books", data);
-      toast.success("Book created successfully!", {
-        position: "top-center",
-        autoClose: 3000,
+      enqueueSnackbar("Book created successfully!", { 
+        variant: "success", 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' } 
       });
       navigate("/");
     } catch (error) {
-      toast.error("An error occurred, please try again.", {
-        position: "top-center",
-        autoClose: 3000,
+      enqueueSnackbar("An error occurred, please try again.", { 
+        variant: "error", 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' } 
       });
       console.error(error);
     } finally {
-      setLoading(false); // Stop loading state
+      setLoading(false); 
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      {/* Back Button */}
       <BackButton />
-      
       <h1 className="text-2xl font-bold mb-4">Create Book</h1>
-      
-      {/* Loading Spinner */}
       {loading && (
         <div className="flex justify-center mb-4">
           <Spinner />
         </div>
       )}
-
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Title */}
         <div className="mb-4">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Title
@@ -67,8 +61,6 @@ const CreateBooks = () => {
             <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
           )}
         </div>
-
-        {/* Author */}
         <div className="mb-4">
           <label htmlFor="author" className="block text-sm font-medium text-gray-700">
             Author
@@ -83,8 +75,6 @@ const CreateBooks = () => {
             <p className="text-sm text-red-500 mt-1">{errors.author.message}</p>
           )}
         </div>
-
-        {/* Publish Year */}
         <div className="mb-4">
           <label htmlFor="publishYear" className="block text-sm font-medium text-gray-700">
             Publish Year
@@ -102,19 +92,16 @@ const CreateBooks = () => {
             <p className="text-sm text-red-500 mt-1">{errors.publishYear.message}</p>
           )}
         </div>
-
         <div className="mt-6">
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-            disabled={loading} // Disable the button when loading
+            disabled={loading}
           >
-            Save Book
+            {loading ? "Saving..." : "Save Book"}
           </button>
         </div>
       </form>
-
-      <ToastContainer />
     </div>
   );
 };
